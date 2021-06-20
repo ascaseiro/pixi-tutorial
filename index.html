@@ -9,8 +9,8 @@
     <script>
       let app;
       let player;
-      let bullets = [];
-      let bulletSpeed = 10;
+      let enemy;
+      let speed = 10;
 
       window.onload = function () {
         app = new PIXI.Application({
@@ -19,63 +19,46 @@
           backgroundColor: 0xaaaaaa,
         });
 
-        document.querySelector("#gameDiv").appendChild(app.view);
-        app.stage.interactive = true;
-        document
-          .querySelector("#gameDiv")
-          .addEventListener("pointerdown", fireBullet);
+        document.body.appendChild(app.view);
 
         // player object
         player = PIXI.Sprite.from("images/player.png");
-        player.x = app.view.width / 2;
+        player.x = 16;
         player.y = app.view.height / 2;
         player.anchor.set(0.5);
         app.stage.addChild(player);
 
+        // enemy object
+        enemy = PIXI.Sprite.from("images/player.png");
+        enemy.x = app.view.width - 16;
+        enemy.y = app.view.height / 2;
+        enemy.anchor.set(0.5);
+        app.stage.addChild(enemy);
+
         app.ticker.add(gameLoop);
       };
 
-      function fireBullet(e) {
-        console.log("FIRE!");
-
-        let bullet = createBullet();
-        bullets.push(bullet);
-      }
-
-      function createBullet() {
-        let bullet = new PIXI.Sprite.from("images/bullet.png");
-        bullet.anchor.set(0.5);
-        bullet.x = player.x;
-        bullet.y = player.y;
-        bullet.speed = bulletSpeed;
-        app.stage.addChild(bullet);
-
-        return bullet;
-      }
-
-      function updateBullets(delta) {
-        for (let i = 0; i < bullets.length; i++) {
-          bullets[i].position.y -= bullets[i].speed;
-
-          if (bullets[i].position.y < 0) {
-            bullets[i].dead = true;
-          }
-        }
-
-        for (let i = 0; i < bullets.length; i++) {
-          if (bullets[i].dead) {
-            app.stage.removeChild(bullets[i]);
-            bullets.splice(i, 1);
-          }
-        }
-      }
-
       function gameLoop(delta) {
-        updateBullets(delta);
+        player.x += speed;
+        enemy.x -= speed;
+
+        if (rectsIntersect(player, enemy)) {
+          speed = 0;
+        }
+      }
+
+      function rectsIntersect(a, b) {
+        let aBox = a.getBounds();
+        let bBox = b.getBounds();
+
+        return (
+          aBox.x + aBox.width > bBox.x &&
+          aBox.x < bBox.x + bBox.width &&
+          aBox.y + aBox.height > bBox.y &&
+          aBox.y < bBox.y + bBox.height
+        );
       }
     </script>
   </head>
-  <body>
-    <div id="gameDiv"></div>
-  </body>
+  <body></body>
 </html>
